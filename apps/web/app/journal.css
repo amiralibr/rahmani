@@ -30,3 +30,14 @@
 .reading p{line-height:2.05}
 .education-note{border-inline-start:3px solid var(--sage);padding-inline-start:16px;color:var(--muted);background:var(--tint-2);border-radius:0 var(--r-sm) var(--r-sm) 0;padding:14px 16px}
 @media(max-width:680px){.journal-grid{grid-template-columns:1fr;gap:22px;padding-block:28px}.paper-art{width:150px}.paper-art b{font-size:54px}.journal-tools,.reading{grid-template-columns:1fr}.journal-row{gap:12px;padding:16px}.journal-tools{gap:4px}}
+
+/* ── Motion polish ─────────────────────────────── */
+.journal-list [data-journal]:nth-child(1){--delay:0ms}.journal-list [data-journal]:nth-child(2){--delay:70ms}.journal-list [data-journal]:nth-child(3){--delay:140ms}.journal-list [data-journal]:nth-child(4){--delay:210ms}
+.journal-row b{transition:transform .3s var(--ease-out)}
+.journal-row:hover b{transform:translateX(-7px)}
+[dir=ltr] .journal-row:hover b{transform:translateX(7px)}
+.journal-hero h1,.journal-hero .journal-kicker{opacity:0;transform:translateY(22px);animation:riseIn .9s var(--ease-out) .1s forwards}
+.journal-hero .journal-kicker{animation-delay:.02s}
+.paper-art{opacity:0;transform:rotate(-2deg) translateY(24px);animation:artIn 1.1s var(--ease-out) .28s forwards}
+@keyframes artIn{to{opacity:1;transform:rotate(-2deg) translateY(0)}}
+@media(prefers-reduced-motion:reduce){.journal-hero h1,.journal-hero .journal-kicker,.paper-art{animation:none;opacity:1;transform:none}}

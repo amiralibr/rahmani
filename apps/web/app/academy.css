@@ -46,3 +46,19 @@
 .course-save button{font:inherit;background:var(--pine-700);color:#f2f7ec;border:0;border-radius:var(--r-sm);padding:.6rem 1rem;cursor:pointer}
 .course-save button:hover{background:var(--pine-600)}
 @media(max-width:720px){.study-grid,.course-list,.course-detail{grid-template-columns:1fr}.study-grid{gap:22px}.study-grid>.course-cover{width:100%;margin:auto;height:150px}.catalogue,.course-detail{padding-block:32px}.course-list{gap:18px}}
+
+/* ── Motion polish ─────────────────────────────── */
+.course-list [data-ac-reveal]:nth-child(1){--delay:0ms}.course-list [data-ac-reveal]:nth-child(2){--delay:80ms}.course-list [data-ac-reveal]:nth-child(3){--delay:160ms}.course-list [data-ac-reveal]:nth-child(4){--delay:240ms}.course-list [data-ac-reveal]:nth-child(5){--delay:320ms}
+.course-tile{position:relative;overflow:hidden}
+.course-tile:after{content:'';position:absolute;top:0;bottom:0;left:-30%;width:36%;background:linear-gradient(105deg,transparent,rgba(255,255,255,.42),transparent);transform:translateX(-240%) skewX(-18deg);transition:transform .8s ease;pointer-events:none}
+.course-tile:hover:after{transform:translateX(420%) skewX(-18deg)}
+.course-tile .sculpture i{transition:transform .5s var(--ease-spring)}
+.course-tile:hover .sculpture i{transform:translateY(-9px)}
+.course-tile:hover .sculpture i:nth-child(2){transform:translateY(-16px)}
+.course-tile:hover .sculpture i:nth-child(3){transform:translateY(-23px)}
+.course-tile .cover-num{transition:opacity .4s,transform .6s var(--ease-out)}
+.course-tile:hover .cover-num{opacity:.6;transform:translateY(-6px)}
+.study-grid h1,.study-grid .study-label,.study-grid p,.study-grid .jump{opacity:0;transform:translateY(22px);animation:riseIn .9s var(--ease-out) .08s forwards}
+.study-grid .study-label{animation-delay:0s}.study-grid p{animation-delay:.18s}.study-grid .jump{animation-delay:.3s}
+.study-grid>.course-cover{opacity:0;transform:translateY(26px) scale(.94);animation:figureIn 1.1s var(--ease-out) .2s forwards}
+@media(prefers-reduced-motion:reduce){.study-grid h1,.study-grid .study-label,.study-grid p,.study-grid .jump,.study-grid>.course-cover{animation:none;opacity:1;transform:none}.course-tile:after{display:none}}
