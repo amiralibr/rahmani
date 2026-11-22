@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# On a trusted recovery host. Use the digest obtained independently of the SFTP store.
+set -euo pipefail
+umask 077
+ops=$(cd "$(dirname "$0")" && pwd -P)
+source "$ops/lib/offsite.sh"
+[[ $# = 2 ]] && valid_archive_name "$1" && [[ $2 =~ ^[a-fA-F0-9]{64}$ ]] || { echo 'Expected a final archive basename and trusted SHA-256.' >&2; exit 2; }
+: "${BACKUP_KEY:?Set the recovery private key path}" "${BACKUP_CERT:?Set the matching certificate path}"
+# These may be relative to the invoking directory, not the temporary download directory.
+export BACKUP_KEY=$(realpath -e -- "$BACKUP_KEY") BACKUP_CERT=$(realpath -e -- "$BACKUP_CERT")
+[[ -r $BACKUP_KEY && -r $BACKUP_CERT ]] || exit 2
+work=$(mktemp -d); trap 'rm -rf -- "$work"' EXIT
+(cd "$work"; printf 'get %s recovered.cms\n' "$1" | remote)
+printf '%s  recovered.cms\n' "${2,,}" | (cd "$work" && sha256sum --check --status) || { echo 'Downloaded archive digest mismatch; restore not started.' >&2; exit 1; }
+begin=$SECONDS
+"$ops/restore-drill" "$work/recovered.cms"
+printf 'Verified offsite drill: %s; restore and schema checks: %ss\n' "$1" "$((SECONDS-begin))"

@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Run from anywhere on the Compose host. Only the recipient's public cert belongs here.
+set -euo pipefail
+umask 077
+root=$(cd "$(dirname "$0")/.." && pwd -P)
+: "${BACKUP_DIR:?Set an absolute directory outside the checkout}" "${BACKUP_CERT:?Set recipient PEM certificate}"
+[[ $BACKUP_DIR = /* && -r $BACKUP_CERT ]] || exit 2
+mkdir -p -- "$BACKUP_DIR"
+dir=$(cd "$BACKUP_DIR" && pwd -P)
+case "$dir/" in "$root/"*) echo 'Refusing to store backups in the checkout.' >&2; exit 2;; esac
+partial=$(mktemp "$dir/.rahmani-XXXXXXXX")
+trap 'rm -f -- "$partial"' EXIT
+# No plaintext archive on the filesystem. pipefail prevents publishing a truncated dump.
+docker compose --project-directory "$root" exec -T db pg_dump -U rahmani -d rahmani -Fc --no-owner --no-privileges |
+ openssl cms -encrypt -binary -stream -outform DER -aes-256-gcm -out "$partial" "$BACKUP_CERT"
+[[ -s $partial ]]
+archive="$dir/rahmani-$(date -u +%Y%m%dT%H%M%SZ)-${partial##*-}.dump.cms"
+ln -- "$partial" "$archive"
+printf '%s\n' "$archive"

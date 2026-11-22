@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# Fixed SSH alias; remote account's initial directory is the archive destination.
+set -euo pipefail
+umask 077
+ops=$(cd "$(dirname "$0")" && pwd -P)
+source "$ops/lib/offsite.sh"
+archive=$("$ops/backup")
+cd -- "$(dirname "$archive")"; name=${archive##*/}
+valid_archive_name "$name" || exit 2
+verify=$(mktemp -d .verify-XXXXXXXX); trap 'rm -rf -- "$verify"' EXIT
+# Read back the encrypted bytes before publishing. Keep local archive even on failure.
+printf 'put %s .%s.part\nget .%s.part %s/copy\n' "$name" "$name" "$name" "$verify" | remote
+cmp -s -- "$name" "$verify/copy" || { echo 'Remote archive verification failed.' >&2; exit 1; }
+printf 'rename .%s.part %s\n' "$name" "$name" | remote
+printf 'Verified remote archive: %s\n' "$name"
+sha256sum -- "$name"

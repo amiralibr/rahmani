@@ -1,0 +1,11 @@
+*
+!apps/
+!apps/web/
+!apps/web/**
+apps/web/node_modules
+apps/web/.next
+apps/web/out
+!apps/api/
+!apps/api/**
+apps/api/node_modules
+apps/api/dist

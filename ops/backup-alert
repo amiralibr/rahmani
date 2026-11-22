@@ -1,0 +1,4 @@
+#!/bin/sh
+set -eu
+# Configure the root alias in the host MTA. Do not email database contents or logs.
+printf 'To: root\nSubject: Rahmani backup failed\n\nThe scheduled backup did not complete. Inspect journalctl -u rahmani-backup.service on the backup host.\n' | /usr/sbin/sendmail -t

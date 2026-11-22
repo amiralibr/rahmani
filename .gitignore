@@ -1,0 +1,10 @@
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+apps/api/dist/
+.env
+
+# Never commit backup material
+*.dump.cms
+restore-key.pem

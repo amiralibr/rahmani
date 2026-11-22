@@ -1,0 +1,33 @@
+services:
+  web:
+    build: .
+    restart: unless-stopped
+    ports:
+      - '127.0.0.1:8080:8080'
+    environment:
+      STAFF_MFA_KEY: ${STAFF_MFA_KEY:-}
+      ACADEMY_CHECKOUT: ${ACADEMY_CHECKOUT:-disabled}
+      HOLD_MINUTES: ${HOLD_MINUTES:-10}
+      ZARINPAL_MERCHANT_ID: ${ZARINPAL_MERCHANT_ID:-}
+      PUBLIC_ORIGIN: ${PUBLIC_ORIGIN:-}
+      PGHOST: db
+      PGPASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    depends_on:
+      db:
+        condition: service_healthy
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: rahmani
+      POSTGRES_USER: rahmani
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U rahmani -d rahmani']
+      interval: 5s
+      timeout: 3s
+      retries: 12
+volumes:
+  pgdata:

@@ -1,0 +1,11 @@
+'use client';
+export type MoveNotice={id:string;at:string;previous_start:string;new_start:string};
+export function Notices({items,en}:{items:MoveNotice[];en:boolean}){
+ if(!items.length)return null;
+ const fmt=(s:string)=>new Date(s).toLocaleString(en?'en-GB':'fa-IR',{timeZone:'Asia/Tehran',dateStyle:'medium',timeStyle:'short'});
+ return <section><h3>{en?'Appointment changes':'اعلان‌های تغییر نوبت'}</h3><p>{en?'Latest 20 changes, newest first. Times are in Tehran time.':'۲۰ تغییر اخیر، از تازه‌ترین به قدیمی‌ترین؛ همهٔ زمان‌ها به وقت تهران هستند.'}</p>{items.map(n=><article className="desk-item" key={n.id}><strong>{en?'Reception changed your appointment':'پذیرش زمان نوبت شما را تغییر داد'}</strong><p>{en?'Previous: ':'زمان قبلی: '}{fmt(n.previous_start)}</p><p>{en?'Replacement: ':'زمان جایگزین: '}{fmt(n.new_start)}</p><small>{en?'Recorded: ':'ثبت تغییر: '}{fmt(n.at)}</small></article>)}</section>;
+}
+export function CalendarReminder({quote,start,end,en}:{quote:string;start:string;end:string;en:boolean}){
+ function download(){const stamp=(s:string)=>new Date(s).toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'');const file=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Rahmani//Appointments//EN','BEGIN:VEVENT',`UID:${quote}@rahmani.invalid`,`DTSTAMP:${stamp(new Date().toISOString())}`,`DTSTART:${stamp(start)}`,`DTEND:${stamp(end)}`,'SUMMARY:Private appointment','BEGIN:VALARM','TRIGGER:-PT1H','ACTION:DISPLAY','DESCRIPTION:Appointment reminder','END:VALARM','END:VEVENT','END:VCALENDAR',''].join('\r\n');const url=URL.createObjectURL(new Blob([file],{type:'text/calendar;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download='appointment.ics';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+ return <><button className="outline" onClick={download}>{en?'Download calendar reminder':'دریافت یادآور تقویم'}</button><small>{en?'Import the file into a private calendar. It requests a one-hour reminder; alerts depend on your calendar settings. After a time change, replace the old event.':'فایل را در تقویم شخصی وارد کنید. یادآور برای یک ساعت قبل تنظیم شده و نمایش آن به تنظیمات تقویم بستگی دارد. پس از تغییر وقت، رویداد قبلی را جایگزین کنید.'}</small></>;
+}

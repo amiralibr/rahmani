@@ -1,0 +1,22 @@
+import {reserved,tuitionEnabled} from './tuition';
+import {BadRequestException,Body,ConflictException,Controller,Get,Header,Inject,NotFoundException,ParseUUIDPipe,Param,Post,Req,UseGuards} from '@nestjs/common';
+import {IsIn,IsInt,IsISO8601,Length,Matches,Max,Min} from 'class-validator';
+import {randomUUID} from 'node:crypto';
+import {DataSource,MigrationInterface,QueryRunner} from 'typeorm';
+import {ReceptionGuard} from './reception';
+const catalogue=['mindfulness','dialogue','parenting'];
+export class Cohorts1795046400024 implements MigrationInterface {
+ async up(q:QueryRunner){await q.query(`CREATE TABLE academy_cohorts(id uuid PRIMARY KEY,course text NOT NULL,instructor text NOT NULL,starts_at timestamptz NOT NULL,capacity integer NOT NULL CHECK(capacity BETWEEN 1 AND 500),fee_irr integer NOT NULL CHECK(fee_irr>=0),publisher uuid NOT NULL REFERENCES staff_accounts(id),UNIQUE(course,starts_at))`);await q.query(`CREATE TABLE academy_enrolments(cohort uuid REFERENCES academy_cohorts(id),client_id uuid REFERENCES client_accounts(id) ON DELETE CASCADE,joined_at timestamptz NOT NULL DEFAULT now(),PRIMARY KEY(cohort,client_id))`)}
+ async down(q:QueryRunner){await q.query('DROP TABLE academy_enrolments,academy_cohorts')}
+}
+class Publish { @IsIn(catalogue) course!:string; @Length(2,100) @Matches(/\S/) instructor!:string; @IsISO8601() @Matches(/Z$/) starts_at!:string; @IsInt() @Min(1) @Max(500) capacity!:number; @IsInt() @Min(0) @Max(2147483647) fee_irr!:number; }
+@Controller('api/v1/academy') export class AcademyController{
+ constructor(@Inject(DataSource) private db:DataSource){}
+ @Get('certificates/:code') @Header('Cache-Control','no-store') async verify(@Param('code',ParseUUIDPipe) code:string){const [r]=await this.db.query('SELECT c.course,r.submitted_at FROM academy_results r JOIN academy_cohorts c ON c.id=r.cohort WHERE certificate=$1',[code]);if(!r)throw new NotFoundException();return r}
+ @Get('exams/ready') @UseGuards(ReceptionGuard) @Header('Cache-Control','no-store') ready(){return this.db.query('SELECT id,course,starts_at,instructor FROM academy_cohorts WHERE starts_at<=now() AND exam_opened_by IS NULL ORDER BY starts_at LIMIT 100')}
+ @Post('exams/:id/open') @UseGuards(ReceptionGuard) async open(@Param('id',ParseUUIDPipe) id:string,@Req() req:{staff:{id:string}}){const rows=await this.db.query('WITH u AS (UPDATE academy_cohorts SET exam_opened_by=$2 WHERE id=$1 AND starts_at<=now() AND exam_opened_by IS NULL RETURNING id) SELECT id FROM u',[id,req.staff.id]);if(!rows.length)throw new ConflictException();return {ok:true}}
+ @Get(':course/cohorts') @Header('Cache-Control','no-store') list(@Param('course') course:string){if(!catalogue.includes(course))throw new BadRequestException();return this.db.query(`SELECT c.id,c.instructor,c.starts_at,c.fee_irr, $2::boolean AS payable,c.capacity-count(e.client_id)::int-${reserved} AS remaining FROM academy_cohorts c LEFT JOIN academy_enrolments e ON e.cohort=c.id WHERE c.course=$1 AND c.starts_at>now() GROUP BY c.id ORDER BY c.starts_at`,[course,tuitionEnabled()])}
+ @Post('cohorts') @UseGuards(ReceptionGuard) async publish(@Body() b:Publish,@Req() req:{staff:{id:string}}){const [row]=await this.db.query(`INSERT INTO academy_cohorts(id,course,instructor,starts_at,capacity,fee_irr,publisher) SELECT $1,$2,$3,$4,$5,$6,$7 WHERE $4::timestamptz>now() ON CONFLICT DO NOTHING RETURNING id`,[randomUUID(),b.course,b.instructor.trim(),b.starts_at,b.capacity,b.fee_irr,req.staff.id]);if(!row)throw new ConflictException();return row;}
+}
+export async function enrol(db:DataSource,id:string,client:string){return db.transaction(async m=>{const [c]=await m.query('SELECT id,capacity FROM academy_cohorts WHERE id=$1 AND fee_irr=0 FOR UPDATE',[id]);if(!c)throw new ConflictException();if((await m.query('SELECT 1 FROM academy_enrolments WHERE cohort=$1 AND client_id=$2',[id,client])).length)return {ok:true};const rows=await m.query(`INSERT INTO academy_enrolments(cohort,client_id) SELECT $1,$2 FROM academy_cohorts WHERE id=$1 AND starts_at>clock_timestamp() AND capacity>(SELECT count(*) FROM academy_enrolments WHERE cohort=$1) RETURNING cohort`,[id,client]);if(!rows.length)throw new ConflictException();return {ok:true}})}
+export function myCourses(db:DataSource,client:string){return db.query(`SELECT c.id,c.course,c.starts_at,c.instructor,c.exam_opened_by IS NOT NULL AS exam_open FROM academy_enrolments e JOIN academy_cohorts c ON c.id=e.cohort WHERE client_id=$1 ORDER BY starts_at DESC`,[client])}

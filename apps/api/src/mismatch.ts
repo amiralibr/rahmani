@@ -1,0 +1,19 @@
+import {ConflictException} from '@nestjs/common';
+import {DataSource,MigrationInterface,QueryRunner} from 'typeorm';
+
+export class Mismatch1795046400021 implements MigrationInterface {
+ async up(q:QueryRunner){await q.query(`CREATE TABLE refund_inquiries(quote_id uuid PRIMARY KEY REFERENCES refund_receipts(quote_id) ON DELETE CASCADE, owner_id uuid NOT NULL REFERENCES staff_accounts(id), opened_at timestamptz NOT NULL DEFAULT now(), outcome text CHECK(outcome IN ('escalated','documents_requested')), recorded_at timestamptz, CHECK((outcome IS NULL)=(recorded_at IS NULL)))`)}
+ async down(q:QueryRunner){await q.query('DROP TABLE refund_inquiries')}
+}
+export async function claimMismatch(db:DataSource,quote:string,staff:string){const rows=await db.query(`WITH u AS (INSERT INTO refund_inquiries(quote_id,owner_id) SELECT b.quote_id,$2 FROM refund_receipts b JOIN cancellation_reviews r USING(quote_id) JOIN gateway_payments p USING(quote_id) WHERE b.quote_id=$1 AND p.state='confirmed' AND r.refund_decision='approved' AND r.proposed_irr>0 AND r.proposed_irr<>b.amount_irr ON CONFLICT DO NOTHING RETURNING quote_id) SELECT * FROM u`,[quote,staff]);if(!rows.length)throw new ConflictException();return {ok:true}}
+export async function recordFinding(db:DataSource,quote:string,staff:string,outcome:string){const rows=await db.query(`WITH u AS (UPDATE refund_inquiries SET outcome=$3,recorded_at=now() WHERE quote_id=$1 AND owner_id=$2 AND outcome IS NULL RETURNING quote_id) SELECT * FROM u`,[quote,staff,outcome]);if(!rows.length)throw new ConflictException();return {ok:true}}
+
+export class InquiryReplies1795046400022 implements MigrationInterface {
+ async up(q:QueryRunner){await q.query(`CREATE TABLE inquiry_replies(id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,quote_id uuid NOT NULL REFERENCES refund_inquiries(quote_id) ON DELETE CASCADE,reference text NOT NULL CHECK(reference ~ '^[A-Z0-9-]{4,64}$'),amount_irr integer NOT NULL CHECK(amount_irr>=0),submitted_by uuid NOT NULL REFERENCES staff_accounts(id),submitted_at timestamptz NOT NULL DEFAULT now(),closed_by uuid REFERENCES staff_accounts(id),closed_at timestamptz,CHECK((closed_by IS NULL)=(closed_at IS NULL)),CHECK(closed_by<>submitted_by),UNIQUE(quote_id,reference))`);await q.query('CREATE INDEX inquiry_reply_order ON inquiry_replies(quote_id,id DESC)');}
+ async down(q:QueryRunner){await q.query('DROP TABLE inquiry_replies')}
+}
+export async function inquiryStep(db:DataSource,quote:string,staff:string,step:{amount:number;reference:string}|{reply:string}){return db.transaction(async m=>{
+ const [i]=await m.query(`SELECT i.owner_id,r.proposed_irr FROM refund_inquiries i JOIN cancellation_reviews r USING(quote_id) WHERE i.quote_id=$1 AND i.outcome IS NOT NULL AND r.refund_decision='approved' FOR UPDATE OF i`,[quote]);if(!i)throw new ConflictException();
+ const [last]=await m.query('SELECT id,amount_irr,closed_at FROM inquiry_replies WHERE quote_id=$1 ORDER BY id DESC LIMIT 1',[quote]);if(last?.closed_at)throw new ConflictException();
+ if('reference' in step){if(staff!==i.owner_id)throw new ConflictException();const added=await m.query('INSERT INTO inquiry_replies(quote_id,reference,amount_irr,submitted_by) VALUES($1,upper($2),$3,$4) ON CONFLICT DO NOTHING RETURNING id',[quote,step.reference,step.amount,staff]);if(!added.length)throw new ConflictException();}
+ else{if(!last||last.id!==step.reply||last.amount_irr!==i.proposed_irr||staff===i.owner_id)throw new ConflictException();const rows=await m.query(`WITH u AS (UPDATE inquiry_replies SET closed_at=now(),closed_by=$2 WHERE id=$1 AND EXISTS(SELECT 1 FROM staff_accounts WHERE id=$2 AND active AND role='reception' AND refund_approver) RETURNING id) SELECT id FROM u`,[last.id,staff]);if(!rows.length)throw new ConflictException();}return {ok:true};});}

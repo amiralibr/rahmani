@@ -1,0 +1,14 @@
+[Unit]
+Description=Encrypted database backup and verified offsite copy
+Wants=network-online.target
+After=network-online.target docker.service
+OnFailure=rahmani-backup-alert.service
+
+[Service]
+Type=oneshot
+UMask=0077
+EnvironmentFile=/etc/rahmani/backup.env
+WorkingDirectory=/opt/rahmani
+ExecStart=/opt/rahmani/ops/backup-offsite
+TimeoutStartSec=4h
+PrivateTmp=yes

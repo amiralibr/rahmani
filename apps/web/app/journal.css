@@ -1,0 +1,32 @@
+/* Journal — calm editorial, same system as globals.css */
+.journal-hero{position:relative;isolation:isolate;background:radial-gradient(760px 420px at 84% -10%,rgba(198,162,113,.22),transparent 60%),linear-gradient(155deg,#1d4436,#122b22 58%,#0e241c);color:#eef3e8;overflow:hidden;border-bottom:2px solid var(--gold)}
+.journal-grid{display:grid;grid-template-columns:1.45fr 1fr;align-items:center;gap:9%;padding-block:clamp(36px,5vw,60px)}
+.journal-hero h1{font-size:clamp(1.75rem,3.8vw,3rem);margin:.1em 0}
+.journal-kicker{font-size:12px;letter-spacing:.14em;color:#c6a271}
+.journal-hero p{color:#c3d2bd;line-height:1.95;max-width:46ch}
+
+.paper-art{position:relative;direction:ltr;justify-self:center;width:min(215px,78%);aspect-ratio:1.42;display:grid;align-content:space-between;padding:20px;color:#2c4029;background:linear-gradient(120deg,#e9e4d3,#f7f4e9 30%,#ddd6c2);border-radius:4px 14px 14px 4px;border-left:8px solid #8a785b;box-shadow:var(--shadow-lg);border:1px solid #d5cfbd;transform:rotate(-2deg)}
+.paper-art span,.paper-art i{font:600 9px/1.4 system-ui;letter-spacing:.18em;color:#6b6146}
+.paper-art b{position:absolute;inset:18% 9% auto auto;font:84px/1 Georgia,serif;color:#55644f;font-style:italic}
+
+.journal-list,.reading{padding-block:44px 68px}
+.journal-tools,.reading{display:grid;gap:22px}
+.journal-tools{grid-template-columns:2fr 1fr;margin:22px 0}
+.journal-tools input,.journal-tools select{font:inherit;color:inherit;width:100%;padding:12px 14px;margin:5px 0;border:1px solid var(--line-strong);border-radius:var(--r-md);background:#fff;min-height:46px}
+.journal-row{margin-top:14px;display:flex;gap:20px;align-items:center;padding:20px 22px;border:1px solid var(--line);border-radius:var(--r-md);background:#fff;box-shadow:var(--shadow-sm);transition:transform .22s var(--ease),box-shadow .28s var(--ease),border-color .22s}
+.journal-row{border-inline-start:3px solid transparent}
+.journal-row:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);border-color:var(--sage-soft);border-inline-start-color:var(--gold)}
+.journal-row h3{margin:4px 0;font-size:1.15rem;color:var(--pine-800)}
+.journal-row p{margin:0;color:var(--muted);line-height:1.9}
+.journal-row>b{margin-inline-start:auto;color:var(--pine-500)}
+.folio{direction:ltr;font:italic 30px Georgia,serif;color:var(--sage)}
+.clear,.reading aside a{text-decoration:underline;text-underline-offset:3px}
+.reading{grid-template-columns:minmax(190px,1fr) 3fr;align-items:start}
+.reading aside{border-radius:var(--r-md);background:var(--tint-2);border:1px solid var(--line);padding:20px}
+.reading aside a{display:block;margin-bottom:10px;color:var(--pine-700)}
+.reading h2{font-size:1.4rem;color:var(--pine-800)}
+.reading article{max-width:68ch}
+.reading article section{padding:14px 0 26px;border-bottom:1px solid var(--line)}
+.reading p{line-height:2.05}
+.education-note{border-inline-start:3px solid var(--sage);padding-inline-start:16px;color:var(--muted);background:var(--tint-2);border-radius:0 var(--r-sm) var(--r-sm) 0;padding:14px 16px}
+@media(max-width:680px){.journal-grid{grid-template-columns:1fr;gap:22px;padding-block:28px}.paper-art{width:150px}.paper-art b{font-size:54px}.journal-tools,.reading{grid-template-columns:1fr}.journal-row{gap:12px;padding:16px}.journal-tools{gap:4px}}

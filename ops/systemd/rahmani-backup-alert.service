@@ -1,0 +1,6 @@
+[Unit]
+Description=Notify local postmaster of a failed Rahmani backup
+
+[Service]
+Type=oneshot
+ExecStart=/opt/rahmani/ops/backup-alert
