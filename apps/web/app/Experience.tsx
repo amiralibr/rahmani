@@ -26,8 +26,10 @@ export default function Experience({en,profile}:{en:boolean;profile:boolean}){
  return ()=>removeEventListener('scroll',onScroll)},[]);
  useEffect(()=>{if(profile){const i=Number(new URLSearchParams(location.search).get('service'));if(Number.isInteger(i)&&i>=0&&i<4)setService(i)}
  if(!('IntersectionObserver' in window)||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
- const obs=new IntersectionObserver(entries=>entries.forEach(({target,isIntersecting})=>{if(isIntersecting){target.classList.remove('waiting');obs.unobserve(target)}}),{threshold:0.08});
- document.querySelectorAll('[data-reveal]').forEach(el=>{el.classList.add('reveal','waiting');obs.observe(el)});return ()=>obs.disconnect();},[locale,profile]);
+ const obs=new IntersectionObserver(entries=>entries.forEach(({target,isIntersecting,boundingClientRect})=>{if(isIntersecting||boundingClientRect.top<0){target.classList.remove('waiting');obs.unobserve(target)}}),{threshold:0.08});
+ document.querySelectorAll('[data-reveal]').forEach(el=>{el.classList.add('reveal','waiting');obs.observe(el)});
+ const pass=()=>document.querySelectorAll('.reveal.waiting').forEach(el=>{if(el.getBoundingClientRect().top<innerHeight*0.98)el.classList.remove('waiting')});addEventListener('scroll',pass,{passive:true});pass();
+ return ()=>{obs.disconnect();removeEventListener('scroll',pass)};},[locale,profile]);
  const modes=[t('حضوری','In person'),t('آنلاین','Online')];
  function choices(title:string,items:string[],value:number,change:(n:number)=>void){return <fieldset><legend>{title}</legend><div className="choices">{items.map((v,i)=><label key={v}><input type="radio" name={title} checked={i===value} onChange={()=>{change(i);setReview(false)}}/><span>{v}</span></label>)}</div></fieldset>}
  useEffect(()=>{if(!profile)return;const controller=new AbortController();setLoading(true);setFailed(false);setSlot('');setReview(false);setDay(0);

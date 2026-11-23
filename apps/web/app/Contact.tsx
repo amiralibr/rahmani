@@ -8,8 +8,10 @@ export default function Contact({en}:{en:boolean}) {
  const [busy,setBusy]=useState(false),[message,setMessage]=useState(''),[reference,setReference]=useState('');const [settings,setSettings]=useState<Record<string,string>>({}),[fbMessage,setFbMessage]=useState(''),[fbBusy,setFbBusy]=useState(false),[fbDone,setFbDone]=useState('');useEffect(()=>{fetch('/api/v1/site/settings',{cache:'no-store'}).then(r=>r.ok?r.json():{}).then(setSettings).catch(()=>{})},[]);
  const area=useRef<HTMLDivElement>(null), sending=useRef(false);
  useEffect(()=>{if(!area.current||!('IntersectionObserver'in window)||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
-  const observer=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.remove('waiting');observer.unobserve(e.target)}}));
-  for(const el of area.current.children){el.classList.add('waiting','reveal');observer.observe(el)}return ()=>observer.disconnect();},[]);
+  const observer=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting||e.boundingClientRect.top<0){e.target.classList.remove('waiting');observer.unobserve(e.target)}}));
+  for(const el of area.current.children){el.classList.add('waiting','reveal');observer.observe(el)}
+  const pass=()=>document.querySelectorAll('.reveal.waiting').forEach(el=>{if(el.getBoundingClientRect().top<innerHeight*0.98)el.classList.remove('waiting')});addEventListener('scroll',pass,{passive:true});pass();
+  return ()=>{observer.disconnect();removeEventListener('scroll',pass)};},[]);
  async function submit(e:FormEvent<HTMLFormElement>){e.preventDefault();if(sending.current)return;
   const form=e.currentTarget,fields=new FormData(form);sending.current=true;setBusy(true);setMessage('');
   try{const res=await fetch('/api/v1/contact-requests',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:String(fields.get('email')).trim(),topic:fields.get('topic'),locale:en?'en':'fa',consent:fields.has('consent')})});
