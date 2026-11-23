@@ -250,9 +250,10 @@ footer a:hover{color:#fff}
 figcaption b{width:34px;height:34px;border-radius:9px}
 figcaption small{font-size:11px;line-height:1.6}
 .hero-inner{grid-template-columns:1fr;min-height:auto;padding-block:36px 56px}.hero-figure{order:-1}.arch{max-width:240px}.trust{justify-content:center;text-align:center}.foot-grid{grid-template-columns:1fr 1fr}.scroll-cue{display:none}}
-@media(max-width:560px){figcaption small{display:none}.figcaption small{display:none}figcaption{max-width:calc(100vw - 72px);padding:8px 10px}.tag{font-size:12px;padding:6px 12px}
+@media(max-width:560px){nav{flex-wrap:wrap;justify-content:flex-start;column-gap:14px;row-gap:4px}figcaption small{display:none}.figcaption small{display:none}figcaption{max-width:calc(100vw - 72px);padding:8px 10px}.tag{font-size:12px;padding:6px 12px}
 .foot-grid{grid-template-columns:1fr}.foot-base{justify-content:center;text-align:center}}
-@media(max-width:720px){.bar{height:auto;min-height:68px;flex-wrap:wrap;padding-block:12px;gap:10px}nav{order:3;width:100%;justify-content:space-between;font-size:12px;border-top:1px solid var(--line);padding-top:8px}.brand{font-size:16px}.small{font-size:12px;padding:8px 10px}.grid{grid-template-columns:1fr;padding-block:30px;gap:30px}figure img{height:auto;aspect-ratio:1.5}.copy p{font-size:15px}.cards{gap:10px}.services{padding-block:36px}.booking-layout{grid-template-columns:1fr}.profile-grid{gap:14px}.profile-grid h1{font-size:1.9rem}.profile-banner .tag{font-size:11px}.profile-grid p{font-size:13px}}
+@media(max-width:920px){.bar{height:auto;min-height:68px;flex-wrap:wrap;padding-block:12px;gap:10px}nav{order:3;width:100%;justify-content:space-between;font-size:12.5px;border-top:1px solid var(--line);padding-top:8px}.brand{font-size:17px;white-space:nowrap}.small{font-size:12.5px;padding:9px 12px;white-space:nowrap}}
+@media(max-width:720px){.grid{grid-template-columns:1fr;padding-block:30px;gap:30px}figure img{height:auto;aspect-ratio:1.5}.copy p{font-size:15px}.cards{gap:10px}.services{padding-block:36px}.booking-layout{grid-template-columns:1fr}.profile-grid{gap:14px}.profile-grid h1{font-size:1.9rem}.profile-banner .tag{font-size:11px}.profile-grid p{font-size:13px}.brand{font-size:16px}.small{font-size:12px;padding:8px 10px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 
 /* ── Print ──────────────────────────────────────────────────────────── */

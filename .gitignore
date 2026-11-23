@@ -8,3 +8,6 @@ apps/api/dist/
 # Never commit backup material
 *.dump.cms
 restore-key.pem
+
+# Third-party tooling, not part of the product
+ui-ux-pro-max-skill-main (2).zip

@@ -1,2 +1,2 @@
 export const dynamic='force-static';
-export default function manifest(){return {name:'Rahmani Counselling Centre',short_name:'Rahmani',description:'In-person and online counselling, Rahmani Academy and psychology journal.',start_url:'/',display:'standalone',background_color:'#fbfaf6',theme_color:'#14332b',lang:'fa',icons:[{src:'/icons.svg',sizes:'any',type:'image/svg+xml'}]}}
+export default function manifest(){return {name:'مرکز روان‌شناسی دکتر رحمانی',short_name:'دکتر رحمانی',description:'مشاورهٔ حضوری و آنلاین، آکادمی رحمانی و مجلهٔ روان‌شناسی.',start_url:'/',display:'standalone',background_color:'#fbfaf6',theme_color:'#14332b',lang:'fa',dir:'rtl',icons:[{src:'/icons.svg',sizes:'any',type:'image/svg+xml'}]}}
